@@ -8,7 +8,7 @@ Terraspace install as a [standalone package](https://terraspace.cloud/docs/insta
 
 ## Boot Hooks
 
-Modify the Terraspace [TS_APP value](https://terraspace.cloud/docs/layering/app-layering/) in [config/boot.rb](https://terraspace.cloud/docs/install/standalone/) for your environment.
+Modify the Terraspace [TS_APP value](https://terraspace.cloud/docs/layering/app-layering/) in [config/boot.rb](https://terraspace.cloud/docs/config/boot/) for your environment.
 
     config/boot.rb # where TS_APP value represents you (example: your IAM username).
 
