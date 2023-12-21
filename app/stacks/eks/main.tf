@@ -83,23 +83,18 @@ module "eks" {
 
   manage_aws_auth_configmap = true
 
-  aws_auth_users = [
-    {
-      userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/apechan"
-      username = "apechan"
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/austin.arlint"
-      username = "austin.arlint"
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/john.whitfield"
-      username = "john.whitfield"
-      groups   = ["system:masters"]
-    }     
-  ]
+  # aws_auth_users = [
+  #   {
+  #     userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/myuser2"
+  #     username = "myuser2"
+  #     groups   = ["system:masters"]
+  #   },
+  #   {
+  #     userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/myuser3"
+  #     username = "myuser3"
+  #     groups   = ["system:masters"]
+  #   }
+  # ]
 
   cluster_tags = {
     Environment = "<%= expansion(':ENV') %>"
