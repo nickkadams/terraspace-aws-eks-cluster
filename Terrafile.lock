@@ -1,0 +1,19 @@
+---
+eks:
+  source: terraform-aws-modules/eks/aws
+  version: 19.21.0
+  type: registry
+  url: https://github.com/terraform-aws-modules/terraform-aws-eks
+  sha: 2cb1fac31b0fc2dd6a236b0c0678df75819c5a3b
+key-pair:
+  source: terraform-aws-modules/key-pair/aws
+  version: 2.0.2
+  type: registry
+  url: https://github.com/terraform-aws-modules/terraform-aws-key-pair
+  sha: 1b2abd5b8255f63b2afe164e243776cb16b813af
+vpc:
+  source: terraform-aws-modules/vpc/aws
+  version: 5.4.0
+  type: registry
+  url: https://github.com/terraform-aws-modules/terraform-aws-vpc
+  sha: acadfc42ba1ec23404eec03b69603a2cc52679b1
