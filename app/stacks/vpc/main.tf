@@ -1,5 +1,5 @@
 locals {
-  name = lower(var.tag_name)
+  name = lower(replace(var.tag_name, ".", "-"))
 }
 
 # https://wolfman.dev/posts/exclude-use1-az3/
