@@ -7,7 +7,7 @@ data "aws_caller_identity" "current" {}
 
 # Get my IP
 data "http" "icanhazip" {
-  url = "http://icanhazip.com"
+  url = "https://ipv4.icanhazip.com"
 }
 
 data "aws_ami" "eks_default_bottlerocket" {
