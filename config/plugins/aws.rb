@@ -5,7 +5,7 @@ TerraspacePluginAws.configure do |config|
     config.s3.access_logging = false
     config.s3.block_public_access = true
     config.s3.encryption = true
-    config.s3.enforce_ssl = true
+    config.s3.enforce_ssl = false
     config.s3.lifecycle = true
     config.s3.versioning = true
     config.s3.secure_existing = false
