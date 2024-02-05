@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "terraspace", "~> 2.2.15"
+gem "terraspace", "~> 2.2.16"
 gem "terraspace_plugin_aws"
 gem "rspec-terraspace"
 

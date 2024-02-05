@@ -6,7 +6,7 @@ variable "tag_name" {
 variable "cluster_version" {
   description = "Kubernetes `<major>.<minor>` version to use for the EKS cluster (i.e.: `1.28`)"
   type        = string
-  default     = 1.28
+  default     = 1.29
 }
 
 variable "cluster_endpoint_public_access" {
