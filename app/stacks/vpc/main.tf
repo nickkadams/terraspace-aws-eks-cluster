@@ -67,6 +67,8 @@ module "vpc" {
   private_subnet_tags = {
     Tier                              = "private"
     "kubernetes.io/role/internal-elb" = 1
+    # Tags subnets for Karpenter auto-discovery
+    "karpenter.sh/discovery" = local.name
   }
 
   public_subnet_tags = {
@@ -110,7 +112,7 @@ data "aws_iam_policy_document" "dynamodb_endpoint_policy" {
 }
 
 module "vpc_endpoints" {
-  source = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
+  source = "../../modules/vpc_endpoints"
 
   vpc_id             = module.vpc.vpc_id
   security_group_ids = [data.aws_security_group.default.id]

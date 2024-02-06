@@ -10,19 +10,8 @@ data "http" "icanhazip" {
   url = "https://ipv4.icanhazip.com"
 }
 
-data "aws_ami" "eks_default_bottlerocket" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["bottlerocket-aws-k8s-${var.cluster_version}-x86_64-*"]
-    #values = ["bottlerocket-aws-k8s-${var.cluster_version}-aarch64-*"]
-  }
-}
-
 module "key_pair" {
-  source = "../../modules/key-pair"
+  source = "../../modules/key_pair"
 
   key_name_prefix    = local.name
   create_private_key = true
@@ -61,19 +50,21 @@ module "eks" {
 
   cluster_addons = {
     coredns = {
-      preserve    = true
       most_recent = true
-
-      timeouts = {
-        create = "25m"
-        delete = "10m"
-      }
     }
     kube-proxy = {
       most_recent = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
+      configuration_values = jsonencode({
+        env = {
+          # Reference docs https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
+          ENABLE_PREFIX_DELEGATION = "true"
+          WARM_PREFIX_TARGET       = "1"
+        }
+      })
     }
   }
 
@@ -81,58 +72,35 @@ module "eks" {
   subnet_ids               = var.private_subnets
   control_plane_subnet_ids = var.control_plane_subnet_ids
 
-  manage_aws_auth_configmap = true
-
-  # aws_auth_users = [
-  #   {
-  #     userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/myuser2"
-  #     username = "myuser2"
-  #     groups   = ["system:masters"]
-  #   },
-  #   {
-  #     userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/myuser3"
-  #     username = "myuser3"
-  #     groups   = ["system:masters"]
-  #   }
-  # ]
-
-  cluster_tags = {
-    Environment = "<%= expansion(':ENV') %>"
-    Owner       = "<%= expansion(':APP') %>"
-    Terraform   = "true"
-    VCS         = "true"
-    Workspace   = terraform.workspace
-  }  
-
   eks_managed_node_group_defaults = {
-    desired_size  = 1
-    min_size      = 0
-    max_size      = 15
-    capacity_type = "ON_DEMAND"
-    platform      = "bottlerocket"
-    ami_id        = data.aws_ami.eks_default_bottlerocket.id
-    # ami_type       = "AL2_x86_64"
-    instance_types = ["t3.small", "t3.medium", "t3.large"]
-    iam_role_additional_policies = {
-      additional = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    }
-
-    # We are using the IRSA created below for permissions
-    # However, we have to deploy with the policy attached FIRST (when creating a fresh cluster)
-    # and then turn this off after the cluster/node group is created. Without this initial policy,
-    # the VPC CNI fails to assign IPs and nodes cannot join the cluster
-    # See https://github.com/aws/containers-roadmap/issues/1666 for more context
-    iam_role_attach_cni_policy = true
+    ami_type       = "AL2_x86_64"
+    instance_types = ["t3.micro", "t3.large", "m5.large"]
   }
 
   eks_managed_node_groups = {
-    # Default node group
-    default_node_group = {
+    # Default node group - as provided by AWS EKS
+    default-eks = {
       # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
       # so we need to disable it to use the default template provided by the AWS EKS managed node group service
       use_custom_launch_template = false
 
       disk_size = 50
+
+      # Remote access cannot be specified with a launch template
+      remote_access = {
+        ec2_ssh_key               = module.key_pair.key_pair_name
+        source_security_group_ids = [aws_security_group.remote_access.id]
+      }
+    }
+
+    # Default node group - as provided by AWS EKS using Bottlerocket
+    default-bottlerocket = {
+      # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
+      # so we need to disable it to use the default template provided by the AWS EKS managed node group service
+      use_custom_launch_template = false
+
+      ami_type = "BOTTLEROCKET_x86_64"
+      platform = "bottlerocket"
 
       # This will get added to what AWS provides
       bootstrap_extra_args = <<-EOT
@@ -141,11 +109,11 @@ module "eks" {
         lockdown = "integrity"
       EOT
 
-      # Remote access cannot be specified with a launch template
-      remote_access = {
-        ec2_ssh_key               = module.key_pair.key_pair_name
-        source_security_group_ids = [aws_security_group.remote_access.id]
-      }
+      instance_types = ["m5.large"]
+
+      min_size     = 1
+      max_size     = 7
+      desired_size = 1
     }
   }
 }
