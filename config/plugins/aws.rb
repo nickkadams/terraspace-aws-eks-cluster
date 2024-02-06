@@ -1,6 +1,6 @@
 TerraspacePluginAws.configure do |config|
     config.auto_create = true
-    config.tags = {Environment: "dev", Owner: "myuser", Terraform: "true", VCS: "true", Workspace: "default"} # set for both s3 bucket and dynamodb table
+    config.tags = {Environment: "dev", Owner: "My User", Terraform: "true", VCS: "true", Workspace: "default"} # set for both s3 bucket and dynamodb table
     config.tag_existing = false  
     config.s3.access_logging = false
     config.s3.block_public_access = true

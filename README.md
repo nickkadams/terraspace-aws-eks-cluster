@@ -35,7 +35,7 @@ To use more modules, add them to the [Terrafile](https://terraspace.cloud/docs/t
 
 To update your ~/.kube/config for EKS:
 
-    aws eks --region us-gov-east-1 update-kubeconfig --name myuser-dev
+    aws eks --region us-gov-east-1 update-kubeconfig --name my-app-dev
 
 ## Test config
 
@@ -48,5 +48,5 @@ Test your configuration:
 Test access to the Amazon EKS API server:
 
     aws eks describe-cluster \
-        --name myuser-dev --region us-gov-east-1 \
+        --name my-app-dev --region us-gov-east-1 \
         --query cluster.resourcesVpcConfig
