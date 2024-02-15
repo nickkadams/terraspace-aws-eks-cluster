@@ -1,9 +1,9 @@
 # More info: https://terraspace.cloud/docs/terrafile/
 
-mod "eks", source: "terraform-aws-modules/eks/aws", version: "20.2.0"
-mod "eks_karpenter", source: "https://github.com/terraform-aws-modules/terraform-aws-eks//modules/karpenter", version: "20.2.0"
-# mod "eks_karpenter", source: "terraform-aws-modules/eks/aws//modules/karpenter", version: "20.2.0"
+mod "eks", source: "terraform-aws-modules/eks/aws", version: "20.2.1"
+mod "eks_aws_auth", source: "https://github.com/terraform-aws-modules/terraform-aws-eks//modules/aws-auth", version: "20.2.1"
+mod "eks_karpenter", source: "https://github.com/terraform-aws-modules/terraform-aws-eks//modules/karpenter", version: "20.2.1"
 mod "key_pair", source: "terraform-aws-modules/key-pair/aws", version: "2.0.2"
-mod "vpc", source: "terraform-aws-modules/vpc/aws", version: "5.5.1"
-mod "vpc_endpoints", source: "https://github.com/terraform-aws-modules/terraform-aws-vpc//modules/vpc-endpoints", version: "5.5.1"
-# mod "vpc_endpoints", source: "terraform-aws-modules/terraform-aws-vpc//modules/vpc-endpoints", version: "5.5.1"
+mod "vpc", source: "terraform-aws-modules/vpc/aws", version: "5.5.2"
+mod "vpc_endpoints", source: "https://github.com/terraform-aws-modules/terraform-aws-vpc//modules/vpc-endpoints", version: "5.5.2"
+# mod "vpc_endpoints", source: "terraform-aws-modules/terraform-aws-vpc//modules/vpc-endpoints", version: "5.5.2"

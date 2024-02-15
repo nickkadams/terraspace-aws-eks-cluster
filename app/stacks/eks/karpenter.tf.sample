@@ -9,6 +9,16 @@ module "eks_karpenter" {
   enable_irsa            = true
   irsa_oidc_provider_arn = module.eks.oidc_provider_arn
 
+  # Match Karpenter docs
+  # https://karpenter.sh/docs/getting-started/migrating-from-cas/#create-iam-roles
+  node_iam_role_name            = "KarpenterNodeRole-${module.eks.cluster_name}"
+  node_iam_role_use_name_prefix = false
+
+  iam_role_name              = "KarpenterControllerRole-${module.eks.cluster_name}"
+  iam_role_use_name_prefix   = false
+  iam_policy_name            = "KarpenterControllerPolicy"
+  iam_policy_use_name_prefix = false
+
   # Used to attach additional IAM policies to the Karpenter node IAM role
   node_iam_role_additional_policies = {
     AmazonSSMManagedInstanceCore = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
