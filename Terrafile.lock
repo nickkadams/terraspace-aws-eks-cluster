@@ -1,17 +1,24 @@
 ---
 eks:
   source: terraform-aws-modules/eks/aws
-  version: 20.2.0
+  version: 20.2.1
   type: registry
   url: https://github.com/terraform-aws-modules/terraform-aws-eks
-  sha: a9212a423fc9e2959ac179c72a3c31bb5826e567
+  sha: 6c168effbe06f6e5ad4b122c7a3b491a2e1c874a
+eks_aws_auth:
+  source: https://github.com/terraform-aws-modules/terraform-aws-eks//modules/aws-auth
+  version: 20.2.1
+  type: git
+  url: https://github.com/terraform-aws-modules/terraform-aws-eks
+  subfolder: modules/aws-auth
+  sha: 6c168effbe06f6e5ad4b122c7a3b491a2e1c874a
 eks_karpenter:
   source: https://github.com/terraform-aws-modules/terraform-aws-eks//modules/karpenter
-  version: 20.2.0
+  version: 20.2.1
   type: git
   url: https://github.com/terraform-aws-modules/terraform-aws-eks
   subfolder: modules/karpenter
-  sha: a9212a423fc9e2959ac179c72a3c31bb5826e567
+  sha: 6c168effbe06f6e5ad4b122c7a3b491a2e1c874a
 key_pair:
   source: terraform-aws-modules/key-pair/aws
   version: 2.0.2
@@ -20,14 +27,14 @@ key_pair:
   sha: 1b2abd5b8255f63b2afe164e243776cb16b813af
 vpc:
   source: terraform-aws-modules/vpc/aws
-  version: 5.5.1
+  version: 5.5.2
   type: registry
   url: https://github.com/terraform-aws-modules/terraform-aws-vpc
-  sha: 7666869d9ca7ff658f5bd10a29dea53bde5dc464
+  sha: f7f84f70ad6db36e4eae0273bf08ed2ffd0a69c4
 vpc_endpoints:
   source: https://github.com/terraform-aws-modules/terraform-aws-vpc//modules/vpc-endpoints
-  version: 5.5.1
+  version: 5.5.2
   type: git
   url: https://github.com/terraform-aws-modules/terraform-aws-vpc
   subfolder: modules/vpc-endpoints
-  sha: 7666869d9ca7ff658f5bd10a29dea53bde5dc464
+  sha: f7f84f70ad6db36e4eae0273bf08ed2ffd0a69c4

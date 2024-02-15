@@ -3,9 +3,10 @@ locals {
 }
 
 # https://wolfman.dev/posts/exclude-use1-az3/
+# https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html#network-requirements-subnets
 data "aws_availability_zones" "available" {
   state = "available"
-  #exclude_zone_ids = ["use1-az3"]
+  #exclude_zone_ids = ["use1-az3", "usw1-az2", "cac1-az3"]
 }
 
 data "aws_caller_identity" "current" {}
@@ -18,6 +19,10 @@ module "vpc" {
 
   cidr = var.aws_network
 
+  # Use 100.64.0.0/10 space for VPC CNI
+  # You can add up to 5 total CIDR blocks
+  # secondary_cidr_blocks = [var.secondary_aws_network]
+
   # 3-AZs
   azs              = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1], data.aws_availability_zones.available.names[2]]
   public_subnets   = [cidrsubnet(var.aws_network, 4, 12), cidrsubnet(var.aws_network, 4, 13), cidrsubnet(var.aws_network, 4, 14)]
@@ -26,12 +31,12 @@ module "vpc" {
   database_subnets = [cidrsubnet(var.aws_network, 12, 3843), cidrsubnet(var.aws_network, 12, 3844), cidrsubnet(var.aws_network, 12, 3845)]
 
   # Intra
-  intra_subnet_suffix = "eks"
+  intra_subnet_suffix = "tgw"
 
   # Database
   create_database_subnet_group       = false
   create_database_subnet_route_table = false
-  database_subnet_suffix             = "tgw"
+  database_subnet_suffix             = "eks"
 
   # https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html#vpc-cidr
   map_public_ip_on_launch = true

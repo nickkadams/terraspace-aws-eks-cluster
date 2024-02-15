@@ -3,7 +3,7 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = "<%= expansion(':ENV') %>"
-      Owner       = "My User"
+      Owner       = "App Owner"
       Terraform   = "true"
       VCS         = "true"
       Workspace   = terraform.workspace

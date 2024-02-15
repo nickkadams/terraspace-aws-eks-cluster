@@ -1,0 +1,21 @@
+module "eks_aws_auth" {
+  source = "../../modules/eks_aws_auth"
+
+  manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      rolearn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/KarpenterNodeRole-${local.name}"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    },
+  ]
+
+  aws_auth_users = [
+    {
+      userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/app.user"
+      username = "app.user"
+      groups   = ["system:masters"]
+    },
+  ]
+}

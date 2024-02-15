@@ -14,6 +14,11 @@ output "vpc_cidr_block" {
   value       = module.vpc.vpc_cidr_block
 }
 
+output "secondary_vpc_cidr_block" {
+  description = "The secondary CIDR block of the VPC"
+  value       = module.vpc.vpc_secondary_cidr_blocks
+}
+
 # Subnets
 output "public_subnets" {
   description = "List of IDs of public subnets"
@@ -25,13 +30,18 @@ output "private_subnets" {
   value       = module.vpc.private_subnets
 }
 
-output "eks_subnets" {
-  description = "List of IDs of intra subnets"
-  value       = module.vpc.intra_subnets
-}
+# output "secondary_private_subnets" {
+#   description = "List of secondary IDs of private subnets"
+#   value       = module.vpc.vpc_secondary_cidr_blocks
+# }
 
 output "tgw_subnets" {
   description = "List of IDs of database subnets"
+  value       = module.vpc.intra_subnets
+}
+
+output "eks_subnets" {
+  description = "List of IDs of intra subnets"
   value       = module.vpc.database_subnets
 }
 
