@@ -4,18 +4,19 @@ locals {
 
 data "aws_partition" "current" {}
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 # Get my IP
 data "http" "icanhazip" {
   url = "https://ipv4.icanhazip.com"
 }
 
-module "key_pair" {
-  source = "../../modules/key_pair"
+# module "key_pair" {
+#   source = "../../modules/key_pair"
 
-  key_name_prefix    = local.name
-  create_private_key = true
-}
+#   key_name_prefix    = local.name
+#   create_private_key = true
+# }
 
 resource "aws_security_group" "remote_access" {
   name_prefix = "${local.name}-remote-access"
@@ -98,6 +99,12 @@ module "eks" {
   subnet_ids = var.private_subnets
   # control_plane_subnet_ids = var.control_plane_subnet_ids
 
+  iam_role_name            = "Cluster-${local.name}"
+  iam_role_use_name_prefix = false
+
+  cluster_encryption_policy_name            = "ClusterEncryption-${local.name}"
+  cluster_encryption_policy_use_name_prefix = false
+
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
     instance_types = var.node_group_instance_types
@@ -112,9 +119,13 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      # name            = "default-"
+      name            = "default-${local.name}"
+      use_name_prefix = false
 
-      min_size     = 2
+      iam_role_name            = "default-${local.name}"
+      iam_role_use_name_prefix = false
+
+      min_size     = 1
       max_size     = 5
       desired_size = 2
 
@@ -125,41 +136,33 @@ module "eks" {
       disk_size = 50
 
       # Remote access cannot be specified with a launch template
-      remote_access = {
-        ec2_ssh_key               = module.key_pair.key_pair_name
-        source_security_group_ids = [aws_security_group.remote_access.id]
-      }
+      # remote_access = {
+      #   ec2_ssh_key               = module.key_pair.key_pair_name
+      #   source_security_group_ids = [aws_security_group.remote_access.id]
+      # }
 
-      iam_role_name            = "KarpenterNodeRole-${local.name}"
-      iam_role_use_name_prefix = false
+      # iam_role_name            = "ClusterAutoscalerNodeRole-${local.name}"
+      # iam_role_use_name_prefix = false
 
-      # Used to attach additional IAM policies to the Karpenter node IAM role
-      iam_role_additional_policies = {
-        AmazonSSMManagedInstanceCore = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
-      }
+      # Used to attach the Cluster-Autoscaler node IAM role policy
+      # iam_role_additional_policies = {
+      #   additional = aws_iam_policy.cluster_autoscaler.arn
+      # }
     }
-
-    #   # Default node group - as provided by AWS EKS using Bottlerocket
-    #   default-bottlerocket = {
-    #     # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
-    #     # so we need to disable it to use the default template provided by the AWS EKS managed node group service
-    #     use_custom_launch_template = false
-
-    #     ami_type = "BOTTLEROCKET_x86_64"
-    #     platform = "bottlerocket"
-
-    #     # This will get added to what AWS provides
-    #     bootstrap_extra_args = <<-EOT
-    #       # extra args added
-    #       [settings.kernel]
-    #       lockdown = "integrity"
-    #     EOT
-
-    #     instance_types = ["m5.large"]
-
-    #     min_size     = 1
-    #     max_size     = 7
-    #     desired_size = 1
-    #   }
   }
+
+  # Tag security group for Karpenter auto-discovery
+  # https://karpenter.sh/docs/getting-started/migrating-from-cas/#add-tags-to-subnets-and-security-groups
+  node_security_group_tags = {
+    "karpenter.sh/discovery" = local.name
+  }
+}
+
+resource "null_resource" "kubectl" {
+  provisioner "local-exec" {
+    command = "aws eks --region ${data.aws_region.current.name} update-kubeconfig --name ${module.eks.cluster_name} --alias ${data.aws_region.current.name}"
+  }
+  # triggers = {
+  #   always_run = "${timestamp()}"
+  # }
 }

@@ -30,13 +30,6 @@ To deploy individual stacks in another region with environment prod and app myus
 
 To use more modules, add them to the [Terrafile](https://terraspace.cloud/docs/terrafile/).
 
-
-## Update kubeconfig
-
-To update your ~/.kube/config for EKS:
-
-    aws eks --region us-gov-east-1 update-kubeconfig --name my-app-dev
-
 ## Test config
 
 Test your configuration:
