@@ -1,0 +1,43 @@
+################################################################################
+# Node IAM Role
+# This is used by the nodes launched by Karpenter
+################################################################################
+resource "aws_iam_role_policy_attachment" "eks_node_group" {
+  role       = module.eks.eks_managed_node_groups["default"].iam_role_name
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# module "eks_karpenter" {
+#   source = "../../modules/eks_karpenter"
+
+#   cluster_name = module.eks.cluster_name
+
+#   # AWS GovCloud (US) does not currently support Pod Identity
+#   # https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.htmpodl#pod-id-restrictions
+#   enable_pod_identity    = false
+#   enable_irsa            = true
+#   irsa_oidc_provider_arn = module.eks.oidc_provider_arn
+
+#   create_node_iam_role = false
+#   node_iam_role_arn    = module.eks.eks_managed_node_groups["default"].iam_role_arn
+#   create_access_entry  = false
+
+#   # Match Karpenter docs
+#   # https://karpenter.sh/docs/getting-started/migrating-from-cas/#create-iam-roles
+#   # node_iam_role_name            = "KarpenterNodeRole-${module.eks.cluster_name}"
+#   # node_iam_role_use_name_prefix = false  
+
+#   # Used to attach additional IAM policies to the Karpenter node IAM role
+#   # node_iam_role_additional_policies = {
+#   #   AmazonSSMManagedInstanceCore = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+#   # }
+
+#   iam_role_name              = "KarpenterController-${module.eks.cluster_name}"
+#   iam_role_use_name_prefix   = false
+#   iam_policy_name            = "KarpenterController-${module.eks.cluster_name}"
+#   iam_policy_use_name_prefix = false
+
+#   # I prefer lowercase
+#   # https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/modules/karpenter/main.tf#L422
+#   queue_name = "karpenter-${module.eks.cluster_name}"
+# }
