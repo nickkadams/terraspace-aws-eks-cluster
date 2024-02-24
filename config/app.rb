@@ -7,7 +7,7 @@ Terraspace.configure do |config|
   config.test_framework = "rspec"
   config.allow.envs = ["dev", "prod"]
   config.allow.regions = ["us-gov-east-1", "us-gov-west-1"]
-  # config.all.exclude_stacks = ["karpenter"]
+  config.all.exclude_stacks = ["karpenter"]
   # copy_modules setting introduced 2.2.5 to speed up terraspace build
   config.build.copy_modules = true
 end

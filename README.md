@@ -24,7 +24,7 @@ To deploy individual stacks:
 
 To deploy individual stacks in another region with environment prod and app myuser:
 
-    AWS_REGION=us-gov-west-1 TS_ENV=prod TS_APP=myuser terraspace up vpc
+    AWS_REGION=us-gov-west-1 TS_ENV=prod TS_APP=my-app terraspace up vpc
 
 ## Terrafile
 
