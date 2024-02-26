@@ -4,7 +4,7 @@
 kubectl apply -f demo-deployment.yaml
 echo ""
 # kubectl get nodes --sort-by=.metadata.creationTimestamp
-kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.creationTimestamp, "\n"' | sort -k4
+kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.labels."eks.amazonaws.com/capacityType"," ",.metadata.labels."karpenter.sh/capacity-type"," ",.metadata.creationTimestamp, "\n"' | sort -k6
 echo ""
 kubectl get pods --sort-by=.metadata.creationTimestamp
 echo ""
@@ -17,7 +17,7 @@ sleep 50
 echo ""
 kubectl get pods --sort-by=.metadata.creationTimestamp
 echo ""
-kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.creationTimestamp, "\n"' | sort -k4
+kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.labels."eks.amazonaws.com/capacityType"," ",.metadata.labels."karpenter.sh/capacity-type"," ",.metadata.creationTimestamp, "\n"' | sort -k6
 echo ""
 
 ### Scale more
@@ -28,7 +28,7 @@ sleep 50
 echo ""
 kubectl get pods --sort-by=.metadata.creationTimestamp
 echo ""
-kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.creationTimestamp, "\n"' | sort -k4
+kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.labels."eks.amazonaws.com/capacityType"," ",.metadata.labels."karpenter.sh/capacity-type"," ",.metadata.creationTimestamp, "\n"' | sort -k6
 echo ""
 
 ### Scale more more
@@ -39,15 +39,15 @@ sleep 50
 echo ""
 kubectl get pods --sort-by=.metadata.creationTimestamp
 echo ""
-kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.creationTimestamp, "\n"' | sort -k4
+kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.labels."eks.amazonaws.com/capacityType"," ",.metadata.labels."karpenter.sh/capacity-type"," ",.metadata.creationTimestamp, "\n"' | sort -k6
 echo ""
 
 ### Scale in
 echo "Scale in to 1 pod"
 echo ""
 kubectl scale --replicas=1 deployment/demo-deployment
-sleep 75
+sleep 80
 echo ""
-kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.creationTimestamp, "\n"' | sort -k4
+kubectl get nodes -o json | jq -Cjr '.items[] | .metadata.name," ",.metadata.labels."beta.kubernetes.io/instance-type"," ",.metadata.labels."eks.amazonaws.com/nodegroup"," ",.metadata.labels."eks.amazonaws.com/capacityType"," ",.metadata.labels."karpenter.sh/capacity-type"," ",.metadata.creationTimestamp, "\n"' | sort -k6
 echo ""
 kubectl get pods --sort-by=.metadata.creationTimestamp
