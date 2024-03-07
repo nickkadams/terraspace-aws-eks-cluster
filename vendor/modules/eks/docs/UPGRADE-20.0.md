@@ -20,6 +20,7 @@ To give users advanced notice and provide some future direction for this module,
 1. The `aws-auth` sub-module will be removed entirely from the project. Since this sub-module is captured in the v20.x releases, users can continue using it even after the module moves forward with the next major version. The long term strategy and direction is cluster access entry and to rely only on the AWS Terraform provider.
 2. The default value for `authentication_mode` will change to `API`. Aligning with point 1 above, this is a one way change, but users are free to specify the value of their choosing in place of this default (when the change is made). This module will proceed with an EKS API first strategy.
 3. The launch template and autoscaling group usage contained within the EKS managed nodegroup and self-managed nodegroup sub-modules *might be replaced with the [`terraform-aws-autoscaling`](https://github.com/terraform-aws-modules/terraform-aws-autoscaling) module. At minimum, it makes sense to replace most of functionality in the self-managed nodegroup module with this external module, but its not yet clear if there is any benefit of using it in the EKS managed nodegroup sub-module. The interface that users interact with will stay the same, the changes will be internal to the implementation and we will do everything we can to keep the disruption to a minimum.
+4. The `platform` variable will be replaced and instead `ami_type` will become the standard across both self-managed nodegroup(s) and EKS managed nodegroup(s). As EKS expands its portfolio of supported operating systems, the `ami_type` is better suited to associate the correct user data format to the respective OS. The `platform` variable is a legacy artifact of self-managed nodegroups but not as descriptive as the `ami_type`, and therefore it will be removed in favor of `ami_type`.
 
 ## Additional changes
 
@@ -221,6 +222,11 @@ Changing the `authentication_mode` is a one-way decision. See [announcement blog
 
 > Switching authentication modes on an existing cluster is a one-way operation. You can switch from CONFIG_MAP to API_AND_CONFIG_MAP. You can then switch from API_AND_CONFIG_MAP to API. You cannot revert these operations in the opposite direction. Meaning you cannot switch back to CONFIG_MAP or API_AND_CONFIG_MAP from API. And you cannot switch back to CONFIG_MAP from API_AND_CONFIG_MAP.
 
+> [!IMPORTANT]
+> If migrating to cluster access entries and you will NOT have any entries that remain in the `aws-auth` ConfigMap, you do not need to remove the configmap from the statefile. You can simply follow the migration guide and once access entries have been created, you can let Terraform remove/delete the `aws-auth` ConfigMap.
+>
+> If you WILL have entries that remain in the `aws-auth` ConfigMap, then you will need to remove the ConfigMap resources from the statefile to avoid any disruptions. When you add the new `aws-auth` sub-module and apply the changes, the sub-module will upsert the ConfigMap on the cluster. Provided the necessary entries are defined in that sub-module's definition, it will "re-adopt" the ConfigMap under Terraform's control.
+
 ### authentication_mode = "CONFIG_MAP"
 
 If using `authentication_mode = "CONFIG_MAP"`, before making any changes, you will first need to remove the configmap from the statefile to avoid any disruptions:
@@ -232,17 +238,19 @@ terraform state rm 'module.eks.kubernetes_config_map.aws_auth[0]' # include if T
 
 Once the configmap has been removed from the statefile, you can add the new `aws-auth` sub-module and copy the relevant definitions from the EKS module over to the new `aws-auth` sub-module definition (see before after diff above).
 
-#### ⚠️ Node IAM Roles
-
-You will need to add entries for any IAM roles used by nodegroups and/or Fargate profiles - the module no longer handles this in the background on behalf of users.
-
-When you apply the changes with the new sub-module, the configmap in the cluster will get updated with the contents provided in the sub-module definition, so please be sure all of the necessary entries are added before applying the changes.
+> [!CAUTION]
+> You will need to add entries to the `aws-auth` sub-module for any IAM roles used by nodegroups and/or Fargate profiles - the module no longer handles this in the background on behalf of users.
+>
+> When you apply the changes with the new sub-module, the configmap in the cluster will get updated with the contents provided in the sub-module definition, so please be sure all of the necessary entries are added before applying the changes.
 
 ### authentication_mode = "API_AND_CONFIG_MAP"
 
 When using `authentication_mode = "API_AND_CONFIG_MAP"` and there are entries that will remain in the configmap (entries that cannot be replaced by cluster access entry), you will first need to update the `authentication_mode` on the cluster to `"API_AND_CONFIG_MAP"`. To help make this upgrade process easier, a copy of the changes defined in the [`v20.0.0`](https://github.com/terraform-aws-modules/terraform-aws-eks/pull/2858) PR have been captured [here](https://github.com/clowdhaus/terraform-aws-eks-v20-migrate) but with the `aws-auth` components still provided in the module. This means you get the equivalent of the `v20.0.0` module, but it still includes support for the `aws-auth` configmap. You can follow the provided README on that interim migration module for the order of execution and return here once the `authentication_mode` has been updated to `"API_AND_CONFIG_MAP"`. Note - EKS automatically adds access entries for the roles used by EKS managed nodegroups and Fargate profiles; users do not need to do anything additional for these roles.
 
 Once the `authentication_mode` has been updated, next you will need to remove the configmap from the statefile to avoid any disruptions:
+
+> [!NOTE]
+> This is only required if there are entries that will remain in the `aws-auth` ConfigMap after migrating. Otherwise, you can skip this step and let Terraform destroy the ConfigMap.
 
 ```sh
 terraform state rm 'module.eks.kubernetes_config_map_v1_data.aws_auth[0]'

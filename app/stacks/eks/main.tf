@@ -55,49 +55,13 @@ module "eks" {
   # To add the current caller identity as an administrator
   enable_cluster_creator_admin_permissions = true
 
-  # access_entries = {
-  #   # Access entry with a policy associated
-  #   karpenter = {
-  #     kubernetes_groups = []
-  #     principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/KarpenterNodeRole-${local.name}"
+  # EKS Cluster Add-ons handled in addons.tf via another module:
+  # https://github.com/aws-ia/terraform-aws-eks-blueprints-addons
+  # cluster_addons
 
-  #     policy_associations = {
-  #       myapp = {
-  #         policy_arn = "arn:${data.aws_partition.current.partition}:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-  #         access_scope = {
-  #           namespaces = ["default"]
-  #           type       = "namespace"
-  #         }
-  #       }
-  #     }
-  #   }
-  # }
-
-  # cluster_addons = {
-  #   coredns = {
-  #     most_recent = true
-  #   }
-  #   kube-proxy = {
-  #     most_recent = true
-  #   }
-  #   vpc-cni = {
-  #     most_recent = true
-  #     before_compute = true
-  #     configuration_values = jsonencode({
-  #       env = {
-  #         ENABLE_POD_ENI                    = "true"
-  #         ENABLE_PREFIX_DELEGATION          = "true"
-  #         POD_SECURITY_GROUP_ENFORCING_MODE = "standard"
-  #       }
-
-  #       enableNetworkPolicy = "true"
-  #     })
-  #   }
-  # }
-
-  vpc_id     = var.vpc_id
-  subnet_ids = var.private_subnets
-  # control_plane_subnet_ids = var.control_plane_subnet_ids
+  vpc_id                   = var.vpc_id
+  subnet_ids               = var.pod_subnets           # var.private_subnets
+  control_plane_subnet_ids = var.control_plane_subnets # var.private_subnets
 
   iam_role_name            = "Cluster-${local.name}"
   iam_role_use_name_prefix = false
@@ -108,47 +72,44 @@ module "eks" {
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
     instance_types = var.node_group_instance_types
-
-    # metadata_options = {
-    #   http_endpoint               = "enabled"
-    #   http_tokens                 = "required"
-    #   http_put_response_hop_limit = 1
-    #   instance_metadata_tags      = "disabled"
-    # }
   }
 
   eks_managed_node_groups = {
-    default = {
-      name            = "default-${local.name}"
+    bootstrap = {
+      name            = "bootstrap-${local.name}"
       use_name_prefix = false
 
-      iam_role_name            = "default-${local.name}"
+      iam_role_name            = "bootstrap-${local.name}"
       iam_role_use_name_prefix = false
 
+      # subnet_ids = var.private_subnets
+
       min_size     = 1
-      max_size     = 5
+      max_size     = 2
       desired_size = 2
 
       # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
       # so we need to disable it to use the default template provided by the AWS EKS managed node group service
       use_custom_launch_template = false
-
-      disk_size = 50
-
-      # Remote access cannot be specified with a launch template
-      # remote_access = {
-      #   ec2_ssh_key               = module.key_pair.key_pair_name
-      #   source_security_group_ids = [aws_security_group.remote_access.id]
-      # }
-
-      # iam_role_name            = "ClusterAutoscalerNodeRole-${local.name}"
-      # iam_role_use_name_prefix = false
-
-      # Used to attach the Cluster-Autoscaler node IAM role policy
-      # iam_role_additional_policies = {
-      #   additional = aws_iam_policy.cluster_autoscaler.arn
-      # }
     }
+
+    # cis = {
+    #   name            = "cis-${local.name}"
+    #   use_name_prefix = false
+
+    #   iam_role_name            = "cis-${local.name}"
+    #   iam_role_use_name_prefix = false
+
+    #   min_size     = 1
+    #   max_size     = 9
+    #   desired_size = 2
+
+    #   # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
+    #   # so we need to disable it to use the default template provided by the AWS EKS managed node group service
+    #   use_custom_launch_template = false
+
+    #   disk_size = 75
+    # }
   }
 
   # Tag security group for Karpenter auto-discovery
@@ -158,7 +119,7 @@ module "eks" {
   }
 }
 
-resource "null_resource" "kubectl" {
+resource "null_resource" "kubeconfig" {
   provisioner "local-exec" {
     command = "aws eks --region ${data.aws_region.current.name} update-kubeconfig --name ${module.eks.cluster_name} --alias ${data.aws_region.current.name}"
   }

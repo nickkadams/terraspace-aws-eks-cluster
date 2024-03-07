@@ -4,4 +4,8 @@ vpc_id = <%= output('vpc.vpc_id') %>
 
 private_subnets = <%= output('vpc.private_subnets') %>
 
-control_plane_subnet_ids = <%= output('vpc.eks_subnets') %>
+pod_subnets = <%= output('vpc.pod_subnets') %>
+
+control_plane_subnets = <%= output('vpc.eks_subnets') %>
+
+azs = <%= output('vpc.azs') %>

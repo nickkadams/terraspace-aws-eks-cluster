@@ -3,10 +3,10 @@ variable "aws_network" {
   type        = string
 }
 
-# variable "secondary_aws_network" {
-#   description = "AWS secondary netblock"
-#   type        = string
-# }
+variable "secondary_aws_network" {
+  description = "AWS secondary netblock"
+  type        = string
+}
 
 variable "tag_name" {
   description = "The tag for Name"
