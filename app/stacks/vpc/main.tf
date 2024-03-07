@@ -21,22 +21,40 @@ module "vpc" {
 
   # Use 100.64.0.0/10 space for VPC CNI
   # You can add up to 5 total CIDR blocks
-  # secondary_cidr_blocks = [var.secondary_aws_network]
+  secondary_cidr_blocks = [var.secondary_aws_network]
 
   # 3-AZs
-  azs              = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1], data.aws_availability_zones.available.names[2]]
-  public_subnets   = [cidrsubnet(var.aws_network, 4, 12), cidrsubnet(var.aws_network, 4, 13), cidrsubnet(var.aws_network, 4, 14)]
-  private_subnets  = [cidrsubnet(var.aws_network, 2, 0), cidrsubnet(var.aws_network, 2, 1), cidrsubnet(var.aws_network, 2, 2)]
-  intra_subnets    = [cidrsubnet(var.aws_network, 12, 3840), cidrsubnet(var.aws_network, 12, 3841), cidrsubnet(var.aws_network, 12, 3842)]
-  database_subnets = [cidrsubnet(var.aws_network, 12, 3843), cidrsubnet(var.aws_network, 12, 3844), cidrsubnet(var.aws_network, 12, 3845)]
+  azs                 = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1], data.aws_availability_zones.available.names[2]]
+  public_subnets      = [cidrsubnet(var.aws_network, 4, 12), cidrsubnet(var.aws_network, 4, 13), cidrsubnet(var.aws_network, 4, 14)]
+  private_subnets     = [cidrsubnet(var.aws_network, 2, 0), cidrsubnet(var.aws_network, 2, 1), cidrsubnet(var.aws_network, 2, 2)]
+  intra_subnets       = [cidrsubnet(var.aws_network, 12, 3843), cidrsubnet(var.aws_network, 12, 3844), cidrsubnet(var.aws_network, 12, 3845)]
+  elasticache_subnets = [cidrsubnet(var.aws_network, 12, 3840), cidrsubnet(var.aws_network, 12, 3841), cidrsubnet(var.aws_network, 12, 3842)]
+  database_subnets    = [cidrsubnet(var.secondary_aws_network, 2, 0), cidrsubnet(var.secondary_aws_network, 2, 1), cidrsubnet(var.secondary_aws_network, 2, 2)]
+  # redshift_subnets    = [cidrsubnet(var.secondary_aws_network, 12, 3843), cidrsubnet(var.secondary_aws_network, 12, 3844), cidrsubnet(var.secondary_aws_network, 12, 3845)]
 
   # Intra
   intra_subnet_suffix = "tgw"
 
+  # Elasticache
+  elasticache_subnet_suffix             = "eks"
+  create_elasticache_subnet_group       = false
+  create_elasticache_subnet_route_table = true
+
   # Database
+  database_subnet_suffix             = "pod"
   create_database_subnet_group       = false
-  create_database_subnet_route_table = false
-  database_subnet_suffix             = "eks"
+  create_database_subnet_route_table = true
+  create_database_nat_gateway_route  = true
+
+  # Redshift
+  # redshift_subnet_suffix             = "tgw-cg"
+  # create_redshift_subnet_group       = false
+  # create_redshift_subnet_route_table = true
+
+  # ACLs
+  public_dedicated_network_acl  = true
+  private_dedicated_network_acl = false
+  intra_dedicated_network_acl   = true
 
   # https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html#vpc-cidr
   map_public_ip_on_launch = true
@@ -69,11 +87,18 @@ module "vpc" {
     Name = "${local.name}-default"
   }
 
-  private_subnet_tags = {
-    Tier                              = "private"
+  database_subnet_tags = {
+    Tier                              = "pod"
     "kubernetes.io/role/internal-elb" = 1
     # Tag subnets for Karpenter auto-discovery
     "karpenter.sh/discovery" = local.name
+  }
+
+  private_subnet_tags = {
+    Tier = "private"
+    # "kubernetes.io/role/internal-elb" = 1
+    # # Tag subnets for Karpenter auto-discovery
+    # "karpenter.sh/discovery" = local.name
   }
 
   public_subnet_tags = {
@@ -134,7 +159,7 @@ module "vpc_endpoints" {
     dynamodb = {
       service         = "dynamodb"
       service_type    = "Gateway"
-      route_table_ids = flatten([module.vpc.intra_route_table_ids, module.vpc.private_route_table_ids, module.vpc.public_route_table_ids])
+      route_table_ids = flatten([module.vpc.public_route_table_ids, module.vpc.private_route_table_ids, module.vpc.database_route_table_ids])
       policy          = data.aws_iam_policy_document.dynamodb_endpoint_policy.json
 
       tags = {
