@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "aws_iam_role" "vpc_cni" {
-  name        = "VPCCNI-${local.name}"
+  name        = "vpc-cni-${local.name}"
   description = "VPC CNI IAM role"
 
   assume_role_policy    = data.aws_iam_policy_document.vpc_cni_assume_role.json
@@ -43,7 +43,7 @@ resource "aws_iam_role_policy_attachment" "vpc_cni" {
 ################################################################################
 
 resource "aws_iam_role" "ebs_csi" {
-  name        = "EBSCSIDriver-${local.name}"
+  name        = "ebs-csi-driver-${local.name}"
   description = "EBS CSI Driver IAM role"
 
   assume_role_policy    = data.aws_iam_policy_document.ebs_csi_assume_role.json
@@ -86,9 +86,9 @@ module "eks_blueprints_addons" {
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
 
-
   eks_addons = {
     aws-ebs-csi-driver = {
+      before_compute           = true
       most_recent              = true
       service_account_role_arn = aws_iam_role.ebs_csi.arn
     }
@@ -105,25 +105,30 @@ module "eks_blueprints_addons" {
     }
   }
 
-  # enable_karpenter             = true
+  # enable_karpenter = true
+  # karpenter_node = {
+  #   iam_role_use_name_prefix = false
+  #   iam_role_description     = "Karpenter node IAM role"
+  # }
+
   # enable_kube_prometheus_stack = true
   # enable_metrics_server        = true
 }
 
-resource "kubectl_manifest" "eni_config" {
-  for_each = zipmap(var.azs, var.pod_subnets) # var.private_subnets
+# resource "kubectl_manifest" "eni_config" {
+#   for_each = zipmap(var.azs, var.pod_subnets) # var.private_subnets
 
-  yaml_body = yamlencode({
-    apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
-    kind       = "ENIConfig"
-    metadata = {
-      name = each.key
-    }
-    spec = {
-      securityGroups = [
-        module.eks.node_security_group_id,
-      ]
-      subnet = each.value
-    }
-  })
-}
+#   yaml_body = yamlencode({
+#     apiVersion = "crd.k8s.amazonaws.com/v1alpha1"
+#     kind       = "ENIConfig"
+#     metadata = {
+#       name = each.key
+#     }
+#     spec = {
+#       securityGroups = [
+#         module.eks.node_security_group_id,
+#       ]
+#       subnet = each.value
+#     }
+#   })
+# }

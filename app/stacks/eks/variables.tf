@@ -48,3 +48,15 @@ variable "azs" {
   description = "A list of availability zones"
   type        = list(string)
 }
+
+# variable "federated_eks_admin" {
+#   description = "Name to use on the federated EKS Admin IAM role created"
+#   type        = string
+#   default     = null
+# }
+
+# variable "federated_eks_read_only" {
+#   description = "Name to use on the federated EKS ReadOnly IAM role created"
+#   type        = string
+#   default     = null
+# }

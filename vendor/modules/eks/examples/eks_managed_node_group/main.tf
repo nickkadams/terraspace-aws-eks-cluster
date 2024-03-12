@@ -89,7 +89,10 @@ module "eks" {
     # AL2023 node group utilizing new user data format which utilizes nodeadm
     # to join nodes to the cluster (instead of /etc/eks/bootstrap.sh)
     al2023_nodeadm = {
+      ami_type = "AL2023_x86_64_STANDARD"
       platform = "al2023"
+
+      use_latest_ami_release_version = true
 
       cloudinit_pre_nodeadm = [
         {
@@ -123,6 +126,8 @@ module "eks" {
     bottlerocket_add = {
       ami_type = "BOTTLEROCKET_x86_64"
       platform = "bottlerocket"
+
+      use_latest_ami_release_version = true
 
       # This will get added to what AWS provides
       bootstrap_extra_args = <<-EOT
@@ -264,6 +269,12 @@ module "eks" {
         additional                         = aws_iam_policy.node_additional.arn
       }
 
+      launch_template_tags = {
+        # enable discovery of autoscaling groups by cluster-autoscaler
+        "k8s.io/cluster-autoscaler/enabled" : true,
+        "k8s.io/cluster-autoscaler/${local.name}" : "owned",
+      }
+
       tags = {
         ExtraTag = "EKS managed node group complete example"
       }
@@ -346,14 +357,15 @@ module "disabled_eks" {
 module "eks_managed_node_group" {
   source = "../../modules/eks-managed-node-group"
 
-  name            = "separate-eks-mng"
-  cluster_name    = module.eks.cluster_name
-  cluster_version = module.eks.cluster_version
+  name                 = "separate-eks-mng"
+  cluster_name         = module.eks.cluster_name
+  cluster_ip_family    = module.eks.cluster_ip_family
+  cluster_service_cidr = module.eks.cluster_service_cidr
 
   subnet_ids                        = module.vpc.private_subnets
   cluster_primary_security_group_id = module.eks.cluster_primary_security_group_id
   vpc_security_group_ids = [
-    module.eks.cluster_security_group_id,
+    module.eks.node_security_group_id,
   ]
 
   ami_type = "BOTTLEROCKET_x86_64"

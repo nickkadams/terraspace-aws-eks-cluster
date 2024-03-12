@@ -49,7 +49,7 @@ module "eks" {
   cluster_endpoint_public_access       = var.cluster_endpoint_public_access
   cluster_endpoint_public_access_cidrs = ["${chomp(data.http.icanhazip.response_body)}/32"]
 
-  authentication_mode = "API_AND_CONFIG_MAP" # "API"
+  authentication_mode = "API" # "API_AND_CONFIG_MAP"
 
   # Cluster access entry
   # To add the current caller identity as an administrator
@@ -60,22 +60,29 @@ module "eks" {
   # cluster_addons
 
   vpc_id                   = var.vpc_id
-  subnet_ids               = var.pod_subnets           # var.private_subnets
   control_plane_subnet_ids = var.control_plane_subnets # var.private_subnets
+  subnet_ids               = var.pod_subnets           # var.private_subnets
 
-  iam_role_name            = "Cluster-${local.name}"
+  iam_role_name            = "cluster-${local.name}"
   iam_role_use_name_prefix = false
+  iam_role_description     = "Cluster IAM role"
 
-  cluster_encryption_policy_name            = "ClusterEncryption-${local.name}"
+  cluster_encryption_policy_name            = "cluster-encryption-${local.name}"
   cluster_encryption_policy_use_name_prefix = false
 
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
     instance_types = var.node_group_instance_types
+
+    # Add IAM policy to managed node groups for Karpenter
+    # https://karpenter.sh/docs/getting-started/migrating-from-cas/#create-iam-roles
+    iam_role_additional_policies = {
+      AmazonSSMManagedInstanceCore = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    }
   }
 
   eks_managed_node_groups = {
-    bootstrap = {
+    mng1 = {
       name            = "bootstrap-${local.name}"
       use_name_prefix = false
 
@@ -91,9 +98,11 @@ module "eks" {
       # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
       # so we need to disable it to use the default template provided by the AWS EKS managed node group service
       use_custom_launch_template = false
+
+      disk_size = 75
     }
 
-    # cis = {
+    # mng2 = {
     #   name            = "cis-${local.name}"
     #   use_name_prefix = false
 
@@ -104,11 +113,41 @@ module "eks" {
     #   max_size     = 9
     #   desired_size = 2
 
-    #   # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
-    #   # so we need to disable it to use the default template provided by the AWS EKS managed node group service
-    #   use_custom_launch_template = false
+    #   launch_template_name            = "cis-${local.name}"
+    #   launch_template_use_name_prefix = false
 
-    #   disk_size = 75
+    #   ami_type                   = "AL2_x86_64"
+    #   ami_id                     = "ami-0f97c28235ecea933" # data.aws_ami.eks_cis.image_id
+    #   enable_bootstrap_user_data = true
+
+    #   instance_types = var.node_group_instance_types
+
+    #   block_device_mappings = {
+    #     xvda = {
+    #       device_name = "/dev/xvda"
+    #       ebs = {
+    #         volume_size = 75
+    #         volume_type = "gp3"
+    #         iops        = 3000
+    #         throughput  = 150
+    #         # encrypted             = true
+    #         # kms_key_id            = module.ebs_kms_key.key_arn
+    #         delete_on_termination = true
+    #       }
+    #     }
+    #   }
+
+    #   # https://aws.github.io/aws-eks-best-practices/security/docs/iam/#identities-and-credentials-for-eks-pods-recommendations
+    #   metadata_options = {
+    #     http_endpoint               = "enabled"
+    #     http_tokens                 = "required"
+    #     http_put_response_hop_limit = 1
+    #     instance_metadata_tags      = "enabled"
+    #   }
+
+    #   # iam_role_additional_policies = {
+    #   #  AmazonEC2ContainerRegistryReadOnly = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    #   # }
     # }
   }
 

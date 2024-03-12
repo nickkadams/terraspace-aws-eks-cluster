@@ -44,8 +44,15 @@ variable "cluster_auth_base64" {
   default     = ""
 }
 
+variable "cluster_service_cidr" {
+  description = "The CIDR block (IPv4 or IPv6) used by the cluster to assign Kubernetes service IP addresses. This is derived from the cluster itself"
+  type        = string
+  default     = ""
+}
+
+# TODO - remove at next breaking change
 variable "cluster_service_ipv4_cidr" {
-  description = "The CIDR block to assign Kubernetes service IP addresses from. If you don't specify a block, Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks"
+  description = "[Deprecated] The CIDR block to assign Kubernetes service IP addresses from. If you don't specify a block, Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks"
   type        = string
   default     = null
 }
@@ -268,6 +275,18 @@ variable "placement" {
   default     = {}
 }
 
+variable "create_placement_group" {
+  description = "Determines whether a placement group is created & used by the nodegroup"
+  type        = bool
+  default     = false
+}
+
+variable "placement_group_strategy" {
+  description = "The placement group strategy"
+  type        = string
+  default     = "cluster"
+}
+
 variable "private_dns_name_options" {
   description = "The options for the instance hostname. The default values are inherited from the subnet"
   type        = map(string)
@@ -336,6 +355,12 @@ variable "ami_release_version" {
   description = "AMI version of the EKS Node Group. Defaults to latest version for Kubernetes version"
   type        = string
   default     = null
+}
+
+variable "use_latest_ami_release_version" {
+  description = "Determines whether to use the latest AMI release version for the given `ami_type` (except for `CUSTOM`). Note: `ami_type` and `cluster_version` must be supplied in order to enable this feature"
+  type        = bool
+  default     = false
 }
 
 variable "capacity_type" {
@@ -419,7 +444,7 @@ variable "create_iam_role" {
 variable "cluster_ip_family" {
   description = "The IP family used to assign Kubernetes pod and service addresses. Valid values are `ipv4` (default) and `ipv6`"
   type        = string
-  default     = null
+  default     = "ipv4"
 }
 
 variable "iam_role_arn" {
