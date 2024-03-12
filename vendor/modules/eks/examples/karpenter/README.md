@@ -43,7 +43,9 @@ kubectl delete node -l karpenter.sh/provisioner-name=default
 ```bash
 # Necessary to avoid removing Terraform's permissions too soon before its finished
 # cleaning up the resources it deployed inside the cluster
-terraform state rm 'module.eks.aws_eks_access_entry.this["cluster_creator_admin"]' || true
+terraform state rm 'module.eks.aws_eks_access_entry.this["cluster_creator"]' || true
+terraform state rm 'module.eks.aws_eks_access_policy_association.this["cluster_creator_admin"]' || true
+
 terraform destroy
 ```
 
@@ -54,8 +56,8 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.38 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.2 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.40 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.7 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 2.0 |
 
@@ -63,8 +65,8 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.38 |
-| <a name="provider_aws.virginia"></a> [aws.virginia](#provider\_aws.virginia) | >= 5.38 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.40 |
+| <a name="provider_aws.virginia"></a> [aws.virginia](#provider\_aws.virginia) | >= 5.40 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.7 |
 | <a name="provider_kubectl"></a> [kubectl](#provider\_kubectl) | >= 2.0 |
 

@@ -1,21 +1,45 @@
-module "eks_aws_auth" {
-  source = "../../modules/eks_aws_auth"
+# resource "aws_iam_role" "federated_eks_admin" {
+#   name        = "${var.federated_eks_admin}-${local.name}"
+#   description = "Federated EKS Admini IAM role"
 
-  manage_aws_auth_configmap = true
+#   assume_role_policy    = # data.aws_iam_policy_document.vpc_cni_assume_role.json
+#   force_detach_policies = true
+# }
 
-  aws_auth_roles = [
-    {
-      rolearn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/KarpenterNodeRole-${local.name}"
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups   = ["system:bootstrappers", "system:nodes"]
-    },
-  ]
+# resource "aws_iam_role" "federated_eks_read_only" {
+#   name        = "${var.federated_eks_read_only}-${local.name}"
+#   description = "Federated EKS ReadOnly IAM role"
 
-  aws_auth_users = [
-    {
-      userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/app.user"
-      username = "app.user"
-      groups   = ["system:masters"]
-    },
-  ]
-}
+#   assume_role_policy    = # data.aws_iam_policy_document.federated_eks_read_only_assume_role.json
+#   force_detach_policies = true
+# }
+
+# kubectl describe -n kube-system configmap/aws-aut
+# module "eks_aws_auth" {
+#   source = "../../modules/eks_aws_auth"
+
+#   manage_aws_auth_configmap = true
+
+#   aws_auth_roles = [
+#     {
+#       # rolearn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/${var.federated_eks_admin}"
+#       rolearn  = aws_iam_role.federated_eks_admin.arn
+#       username = "${var.federated_eks_admin}:{{SessionName}}"
+#       groups   = ["system:masters"]
+#     },
+#     {
+#       # rolearn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/${var.federated_eks_read_only}"
+#       rolearn  = aws_iam_role.federated_eks_read_only.arn
+#       username = "${var.federated_eks_read_only}:{{SessionName}}"
+#       groups   = ["view"]
+#     },
+#   ]
+
+#   aws_auth_users = [
+#     {
+#       userarn  = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:user/app.user"
+#       username = "app.user"
+#       groups   = ["system:masters"]
+#     },
+#   ]
+# }

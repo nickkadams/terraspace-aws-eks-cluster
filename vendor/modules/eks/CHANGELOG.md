@@ -2,6 +2,69 @@
 
 All notable changes to this project will be documented in this file.
 
+## [20.8.3](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.8.2...v20.8.3) (2024-03-12)
+
+
+### Bug Fixes
+
+* Ensure the correct service CIDR and IP family is used in the rendered user data ([#2963](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2963)) ([aeb9f0c](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/aeb9f0c990b259320a6c3e5ff93be3f064bb9238))
+
+## [20.8.2](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.8.1...v20.8.2) (2024-03-11)
+
+
+### Bug Fixes
+
+* Ensure a default `ip_family` value is provided to guarantee a CNI policy is attached to nodes ([#2967](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2967)) ([29dcca3](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/29dcca335d80e248c57b8efa2c36aaef2e1b1bd2))
+
+## [20.8.1](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.8.0...v20.8.1) (2024-03-10)
+
+
+### Bug Fixes
+
+* Do not attach policy if Karpenter node role is not created by module ([#2964](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2964)) ([3ad19d7](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/3ad19d7435f34600e4872fd131e155583e498cd9))
+
+## [20.8.0](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.7.0...v20.8.0) (2024-03-10)
+
+
+### Features
+
+* Replace the use of `toset()` with static keys for node IAM role policy attachment ([#2962](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2962)) ([57f5130](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/57f5130132ca11fd3e478a61a8fc082a929540c2))
+
+## [20.7.0](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.6.0...v20.7.0) (2024-03-09)
+
+
+### Features
+
+* Add supprot for creating placement group for managed node group ([#2959](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2959)) ([3031631](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/30316312f33fe7fd09faf86fdb1b01ab2a377b2a))
+
+## [20.6.0](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.5.3...v20.6.0) (2024-03-09)
+
+
+### Features
+
+* Add support for tracking latest AMI release version on managed nodegroups ([#2951](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2951)) ([393da7e](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/393da7ec0ed158cf783356ab10959d91430c1d80))
+
+## [20.5.3](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.5.2...v20.5.3) (2024-03-08)
+
+
+### Bug Fixes
+
+* Update AWS provider version to support `AL2023_*` AMI types; ensure AL2023 user data receives cluster service CIDR ([#2960](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2960)) ([dfe4114](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/dfe41141c2385db783d97494792c8f2e227cfc7c))
+
+## [20.5.2](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.5.1...v20.5.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* Use the `launch_template_tags` on the launch template ([#2957](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2957)) ([0ed32d7](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/0ed32d7b291513f34775ca85b0aa33da085d09fa))
+
+## [20.5.1](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.5.0...v20.5.1) (2024-03-07)
+
+
+### Bug Fixes
+
+* Update CI workflow versions to remove deprecated runtime warnings ([#2956](https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2956)) ([d14cc92](https://github.com/terraform-aws-modules/terraform-aws-eks/commit/d14cc925c450451b023407d05a2516d7682d1617))
+
 ## [20.5.0](https://github.com/terraform-aws-modules/terraform-aws-eks/compare/v20.4.0...v20.5.0) (2024-03-01)
 
 

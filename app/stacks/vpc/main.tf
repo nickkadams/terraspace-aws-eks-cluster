@@ -61,7 +61,7 @@ module "vpc" {
 
   # NAT/VPN
   enable_nat_gateway = true
-  single_nat_gateway = true
+  single_nat_gateway = false
   enable_vpn_gateway = false
 
   # DNS options
@@ -166,5 +166,39 @@ module "vpc_endpoints" {
         Name = local.name
       }
     }
+  }
+}
+
+# Secondary CIDR range + private NAT gateway
+# https://itnext.io/eks-and-the-quest-for-ip-addresses-secondary-cidr-ranges-and-private-nat-gateways-1f5c69473a40
+resource "aws_nat_gateway" "private_cg" {
+  count = 3
+
+  connectivity_type = "private"
+
+  subnet_id = element(
+    module.vpc.database_subnets,
+    count.index,
+  )
+
+  tags = merge(
+    {
+      "Name" = format(
+        "${local.name}-private-%s",
+        element(module.vpc.azs, false ? 0 : count.index),
+      )
+    }
+  )
+}
+
+resource "aws_route" "private_cg_nat_gateway" {
+  count = 3
+
+  route_table_id         = element(module.vpc.database_route_table_ids, count.index)
+  destination_cidr_block = "172.16.0.0/12"
+  nat_gateway_id         = element(aws_nat_gateway.private_cg[*].id, count.index)
+
+  timeouts {
+    create = "5m"
   }
 }

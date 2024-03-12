@@ -38,6 +38,18 @@ variable "cluster_auth_base64" {
   default     = ""
 }
 
+variable "cluster_service_cidr" {
+  description = "The CIDR block (IPv4 or IPv6) used by the cluster to assign Kubernetes service IP addresses. This is derived from the cluster itself"
+  type        = string
+  default     = ""
+}
+
+variable "cluster_ip_family" {
+  description = "The IP family used to assign Kubernetes pod and service addresses. Valid values are `ipv4` (default) and `ipv6`"
+  type        = string
+  default     = "ipv4"
+}
+
 variable "pre_bootstrap_user_data" {
   description = "User data that is injected into the user data script ahead of the EKS bootstrap script. Not used when `platform` = `bottlerocket`"
   type        = string
@@ -537,12 +549,6 @@ variable "create_iam_instance_profile" {
   description = "Determines whether an IAM instance profile is created or to use an existing IAM instance profile"
   type        = bool
   default     = true
-}
-
-variable "cluster_ip_family" {
-  description = "The IP family used to assign Kubernetes pod and service addresses. Valid values are `ipv4` (default) and `ipv6`"
-  type        = string
-  default     = null
 }
 
 variable "iam_instance_profile_arn" {

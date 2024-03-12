@@ -1,29 +1,29 @@
 ---
 eks:
   source: terraform-aws-modules/eks/aws
-  version: 20.5.0
+  version: 20.8.3
   type: registry
   url: https://github.com/terraform-aws-modules/terraform-aws-eks
-  sha: 19b79df055512a7d61641fc716c9a2c597c7d277
+  sha: 1627231af669796669ce83e0a4672a7e6d94a0b3
 eks_aws_auth:
   source: https://github.com/terraform-aws-modules/terraform-aws-eks//modules/aws-auth
-  version: 20.5.0
+  version: 20.8.3
   type: git
   url: https://github.com/terraform-aws-modules/terraform-aws-eks
   subfolder: modules/aws-auth
-  sha: 19b79df055512a7d61641fc716c9a2c597c7d277
+  sha: 1627231af669796669ce83e0a4672a7e6d94a0b3
 eks_blueprints_addons:
   source: aws-ia/eks-blueprints-addons/aws
-  version: 1.15.1
+  version: 1.16.0
   type: registry
   url: https://github.com/aws-ia/terraform-aws-eks-blueprints-addons
-  sha: 077b8bc5663a66ada7f671a18c023c2dd017c7ed
+  sha: 345ce9f21805c3d9290227662f82eae66949d379
 key_pair:
   source: terraform-aws-modules/key-pair/aws
-  version: 2.0.2
+  version: 2.0.3
   type: registry
   url: https://github.com/terraform-aws-modules/terraform-aws-key-pair
-  sha: 1b2abd5b8255f63b2afe164e243776cb16b813af
+  sha: 1e88df14c910b72d6dd9d95b8ad3a99e88e88d7e
 vpc:
   source: terraform-aws-modules/vpc/aws
   version: 5.5.3
